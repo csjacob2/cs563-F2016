@@ -14,13 +14,12 @@
 ]{biblatex}
 \bibliography{bibliography.bib}
  
- 
 \title{\vspace{-3.0cm}CS563: Advanced Computer Security \\ Research Proposal}
 \author{Cassandra Jacobs and James Smith\\
 \href{mailto:csjacobs2@illinois.edu}{csjacobs2@illinois.edu } \\
 \href{mailto:smith152@illinois.edu}{smith152@illinois.edu}}
 \date{\today}
-
+\newcommand\tab[1][1cm]{\hspace*{#1}}
 \begin{document}
 
 \maketitle
@@ -30,7 +29,8 @@
 
 
 \begin{abstract}
-\blindtext
+\input{abstract}
+\label{abstract}
 \end{abstract}
 
 
@@ -51,8 +51,8 @@
 \label{proposed-approach}
 
 \section{Research Plan}
-\input{proposed-approach}
-\label{proposed-approach}
+\input{proposed-plan}
+\label{proposed-plan}
 
 \printbibliography
 
