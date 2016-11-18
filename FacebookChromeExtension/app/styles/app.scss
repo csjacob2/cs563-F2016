@@ -1,0 +1,21 @@
+@import '../../bower_components/bootstrap-sass/assets/stylesheets/_bootstrap'; 
+@import '../../bower_components/font-awesome/scss/font-awesome';
+
+html {
+  width: 700px; 
+  height: 450px; 
+  color: #666;
+}
+
+.app-header {
+    float: right; 
+}
+
+.app-body {
+    margin-top: 3%; 
+}
+
+.home-login {
+    margin-top: 25%;
+    margin-left: 40%; 
+}

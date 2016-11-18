@@ -25,6 +25,7 @@ var semver = require('semver');
 var series = require('stream-series');
 var plumber = require('gulp-plumber'); 
 var debug = require('gulp-debug'); 
+var wait = require('gulp-wait'); 
 
 var express = require('express');
 var serveStatic = require('serve-static');
@@ -44,6 +45,7 @@ var PATH = {
         all: 'dist',
         dev: {
             all: 'dist/dev',
+            css: 'dist/dev/styles',
             lib: 'dist/dev/lib',
             ng2: 'dist/dev/lib/@angular', 
             rxjs: 'dist/dev/lib/rxjs',
@@ -68,10 +70,13 @@ var PATH = {
             './systemjs.config.js',
             './node_modules/fb/lib/fb.js',
             './app/startup.js',
-
+            './bower_components/jquery/dist/jquery.min.js',
+            './bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js'
         ],
         angular2: [
-            './node_modules/@angular/**/*.js'
+            './node_modules/@angular/**/*',
+            './node_modules/ng2-bootstrap/**/*',
+            './node_modules/moment/**/*'
         ],
         rxjs: [
             './node_modules/rxjs/**/*.js'
@@ -97,6 +102,13 @@ var tsProject = tsc.createProject('tsconfig.json', {
 
 var semverReleases = ['major', 'premajor', 'minor', 'preminor', 'patch',
     'prepatch', 'prerelease'];
+
+var sassConfig = {
+     sassPath: './resources/sass',
+     bootstrapDir: './bower_components/bootstrap-sass/assets/stylesheets',
+     fontAwesomeDir: './bower_components/font-awesome/scss',
+     bowerDir: './bower_components' 
+}
 
 // --------------
 // Clean.
@@ -132,34 +144,22 @@ gulp.task('clean.tmp', function (done) {
 // --------------
 // Build dev.
 
-gulp.task('build.lib.dev', ['build.angular.dev', 'build.rxjs.dev', 'build.chromeExtension.dev', 'build.facebook.dev'], function () {
+gulp.task('build.lib.dev', ['build.lib.vendor.dev'], function () {
     return gulp.src(PATH.src.lib)
+        .pipe(plumber())
         .pipe(gulp.dest(PATH.dest.dev.lib));
 });
 
-gulp.task('build.angular.dev', function() {
-    return gulp.src(PATH.src.angular2)
+gulp.task('build.lib.vendor.dev', function() {
+    var sources = PATH.src.angular2
+                          .concat(PATH.src.rxjs)
+                          .concat(PATH.src.facebook)
+                          .concat(PATH.src.rxjs)
+                          .concat(PATH.src.chromeExtension); 
+    return gulp.src(sources, {base: './node_modules/'})
         .pipe(plumber())
-        .pipe(gulp.dest(PATH.dest.dev.ng2));
-}); 
-
-gulp.task('build.rxjs.dev', function() {
-    return gulp.src(PATH.src.rxjs)
-        .pipe(plumber())
-        .pipe(gulp.dest(PATH.dest.dev.rxjs));
-}); 
-
-gulp.task('build.facebook.dev', function() {
-    return gulp.src(PATH.src.facebook)
-        .pipe(plumber())
-        .pipe(gulp.dest(PATH.dest.dev.facebook));
-}); 
-
-gulp.task('build.chromeExtension.dev', function() {
-    return gulp.src(PATH.src.chromeExtension)
-        .pipe(plumber())
-        .pipe(gulp.dest(PATH.dest.dev.all));
-}); 
+        .pipe(gulp.dest(PATH.dest.dev.lib));
+});
 
 gulp.task('build.js.dev', function () {
     var result = gulp.src('./app/**/*ts')
@@ -173,10 +173,13 @@ gulp.task('build.js.dev', function () {
         .pipe(gulp.dest(PATH.dest.dev.all));
 });
 
-gulp.task('build.assets.dev', ['build.js.dev'], function () {
-    gulp.src(['./app/**/*.sass', './app/**/*.scss'])
+gulp.task('build.css.dev', function() {
+    return gulp.src(['./app/**/*.sass', './app/**/*.scss'])
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest(PATH.dest.dev.all));
+});
+
+gulp.task('build.assets.dev', ['build.js.dev', 'build.css.dev'], function () {
     return gulp.src(['./app/**/*.html', './app/**/*.css'])
         .pipe(gulp.dest(PATH.dest.dev.all));
 });

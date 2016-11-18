@@ -23,6 +23,8 @@
       'ng2-facebook-sdk': './lib/ng2-facebook-sdk/dist/ng2-facebook-sdk.js',
       // other libraries
       'rxjs':                      './lib/rxjs',
+      'ng2-bootstrap/ng2-bootstrap': './lib/ng2-bootstrap/bundles/ng2-bootstrap.umd.js',
+      'moment': './lib/moment/moment.js', 
       'angular-in-memory-web-api': './lib/angular-in-memory-web-api',
     },
     // packages tells the System loader how to load when no filename and/or no extension
