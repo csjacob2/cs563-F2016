@@ -2,3 +2,7 @@ node_modules/
 bower_components/
 typings/
 dist/
+app/**/*.js
+app/**/*.d.ts
+classifier/**/*.d.ts
+classifier/**/*.js
