@@ -3,8 +3,9 @@ import { Http, Headers } from '@angular/http';
 import { FacebookLoginService } from '../../services/FacebookLoginService'
 
 @Component({
+  moduleId: module.id,
   selector: 'app-settings',
-  templateUrl: '/components/settings/settings.component.html',
+  templateUrl: 'settings.component.html',
   providers: [FacebookLoginService]
 })
 export class SettingsComponent {

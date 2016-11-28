@@ -1,3 +1,32 @@
-<div class="home-login">
-    <button (click)="loginToFacebook()">Login to Facebook</button>
+<div class="container">
+    <div class="row fb-comment">
+        <textarea [(ngModel)]="userComment" class="form-control" rows="6"></textarea>
+    </div>
+    <div class="row fb-results nopadding">
+        <div class="col-xs-3 nopadding">
+            <div class="panel panel-default">
+              <div class="panel-heading">Categories</div>
+              <div *ngFor='let item of assignedCategories; let i = index;' class="panel-body">
+                  {{item}}
+              </div>
+            </div>
+        </div>
+        <div class="col col-xs-3">
+            <div class="panel panel-default">
+              <div class="panel-heading">FB Groups</div>
+              <div *ngFor='let item of assignedFBGroups; let i = index;' class="panel-body">
+                  {{item}}
+              </div>
+            </div>
+        </div>
+        <div class="col col-xs-1">
+        </div>
+        <div class="col-xs-5 nopadding">
+            <div class="fb-buttons">
+                <button class="btn btn-primary" (click)="analyzeComent()">Analyze</button>
+                <button class="btn btn-primary" [disabled]='!assignedFBGroups' (click)="postComent()">Post</button>
+            </div>
+        </div>
+    </div>
+    <!--<button (click)="loginToFacebook()">Login to Facebook</button>-->
 </div>

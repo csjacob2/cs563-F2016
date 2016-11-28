@@ -5,12 +5,15 @@ var bump = require('gulp-bump');
 var concat = require('gulp-concat');
 var filter = require('gulp-filter');
 var inject = require('gulp-inject');
+var browserify = require('gulp-browserify'); 
+var rename = require('gulp-rename');
 var minifyCSS = require('gulp-minify-css');
 var minifyHTML = require('gulp-minify-html');
 var plumber = require('gulp-plumber');
 var sourcemaps = require('gulp-sourcemaps');
 var template = require('gulp-template');
 var tsc = require('gulp-typescript');
+var merge = require('merge2');
 var uglify = require('gulp-uglify');
 var watch = require('gulp-watch');
 var insert = require('gulp-insert');
@@ -45,11 +48,16 @@ var PATH = {
         all: 'dist',
         dev: {
             all: 'dist/dev',
+            app: 'dist/dev/app',
+            app_config: [
+                './dist/dev/app/systemjs.config.js',
+                './dist/dev/app/startup.js'
+            ],
             css: 'dist/dev/styles',
             lib: 'dist/dev/lib',
             ng2: 'dist/dev/lib/@angular', 
             rxjs: 'dist/dev/lib/rxjs',
-            facebook: 'dist/dev/lib/ng2-facebook-sdk'
+            facebook: 'dist/dev/lib/ng2-facebook-sdk',
         },
         prod: {
             all: 'dist/prod',
@@ -57,7 +65,10 @@ var PATH = {
         }
     },
     src: {
-        // Order is quite important here for the HTML tag injection.
+        app_config: [
+            './systemjs.config.js',
+            './app/startup.js',
+        ],
         lib: [
             './node_modules/traceur/bin/traceur-runtime.js',
             './node_modules/es6-module-loader/dist/es6-module-loader-sans-promises.js',
@@ -67,17 +78,25 @@ var PATH = {
             './node_modules/systemjs/dist/system.src.js',
             './node_modules/core-js/client/shim.min.js',
             './node_modules/zone.js/dist/zone.js',
-            './systemjs.config.js',
             './node_modules/fb/lib/fb.js',
-            './app/startup.js',
             './bower_components/jquery/dist/jquery.min.js',
             './bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js'
         ],
         angular2: [
             './node_modules/@angular/**/*',
             './node_modules/ng2-bootstrap/**/*',
-            './node_modules/moment/**/*'
+            './node_modules/moment/**/*',
+            './node_modules/natural/**/*',
+            './node_modules/nedb/**/*.js',
         ],
+        classifier: { 
+            app: [
+                './classifier/**/*',
+            ],
+            resources: [
+                './web_crawler/cnnArticles.db'
+            ] 
+        },
         rxjs: [
             './node_modules/rxjs/**/*.js'
         ],
@@ -96,8 +115,14 @@ var LIVE_RELOAD_PORT = 4002;
 
 var HTMLMinifierOpts = {conditionals: true};
 
-var tsProject = tsc.createProject('tsconfig.json', {
-    typescript: require('typescript')
+var tsAppProject = tsc.createProject('tsconfig.json', {
+    typescript: require('typescript'),
+});
+
+var tsClassifierProject = tsc.createProject('tsconfig.json', {
+    typescript: require('typescript'),
+    declaration: true, 
+    module: 'commonjs'
 });
 
 var semverReleases = ['major', 'premajor', 'minor', 'preminor', 'patch',
@@ -161,142 +186,65 @@ gulp.task('build.lib.vendor.dev', function() {
         .pipe(gulp.dest(PATH.dest.dev.lib));
 });
 
-gulp.task('build.js.dev', function () {
-    var result = gulp.src('./app/**/*ts')
+gulp.task('build.js.app.dev', function () {
+    var result = gulp.src(['./app/**/*.ts'])
         .pipe(plumber())
         .pipe(sourcemaps.init())
-        .pipe(tsProject());
+        .pipe(tsAppProject());
 
     return result.js
         .pipe(sourcemaps.write())
         .pipe(template(templateLocals()))
-        .pipe(gulp.dest(PATH.dest.dev.all));
+        .pipe(gulp.dest(PATH.dest.dev.app));
 });
+
+gulp.task('build.js.classifier.dev', function() {
+    var result = gulp.src(['./classifier/**/*.ts'], {base: '.'})
+        .pipe(plumber())
+        .pipe(sourcemaps.init())
+        .pipe(tsClassifierProject());
+    
+    return merge([
+            result.dts.pipe(gulp.dest('.')), 
+            result.js.pipe(gulp.dest('.')), 
+        ]); 
+}); 
+
+gulp.task('build.classifier.dev', ['build.js.classifier.dev'], function() {
+}); 
 
 gulp.task('build.css.dev', function() {
     return gulp.src(['./app/**/*.sass', './app/**/*.scss'])
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest(PATH.dest.dev.all));
+        .pipe(gulp.dest(PATH.dest.dev.app));
 });
 
-gulp.task('build.assets.dev', ['build.js.dev', 'build.css.dev'], function () {
+gulp.task('build.app.config.dev', function () {
+    return gulp.src(PATH.src.app_config)
+        .pipe(gulp.dest(PATH.dest.dev.app));
+});
+
+gulp.task('build.assets.dev', ['build.app.config.dev', 'build.js.app.dev', 'build.css.dev'], function () {
     return gulp.src(['./app/**/*.html', './app/**/*.css'])
-        .pipe(gulp.dest(PATH.dest.dev.all));
+        .pipe(gulp.dest(PATH.dest.dev.app));
 });
 
 gulp.task('build.index.dev', function () {
     var target = gulp.src(injectableDevAssetsRef(), {read: false});
-    return gulp.src(PATH.dest.dev.all + '/index.html')
+    return gulp.src(PATH.dest.dev.app + '/index.html')
         .pipe(inject(target, {transform: transformPath('dev')}))
         .pipe(template(templateLocals()))
-        .pipe(gulp.dest(PATH.dest.dev.all));
+        .pipe(gulp.dest(PATH.dest.dev.app));
 });
 
 gulp.task('build.app.dev', function (done) {
-    runSequence('clean.app.dev', 'build.assets.dev', 'build.index.dev', done);
+    runSequence('clean.app.dev', 'build.classifier.dev', 'build.assets.dev', 'build.index.dev', done);
 });
 
 gulp.task('build.dev', function (done) {
     runSequence('clean.dev', 'build.lib.dev', 'build.app.dev', done);
 });
 
-// --------------
-// Build prod.
-
-gulp.task('build.ng2.prod', function () {
-    ng2Builder.build('angular2/router - angular2/angular2', join('tmp', 'router.js'), {});
-    return ng2Builder.build('angular2/angular2', join('tmp', 'angular2.js'), {});
-});
-
-gulp.task('build.lib.prod', ['build.ng2.prod'], function () {
-    var jsOnly = filter('**/*.js');
-    var lib = gulp.src(PATH.src.lib);
-    var ng2 = gulp.src('tmp/angular2.js');
-    var router = gulp.src('tmp/router.js');
-
-    return series(lib, ng2, router)
-        .pipe(jsOnly)
-        .pipe(concat('lib.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest(PATH.dest.prod.lib));
-});
-
-gulp.task('build.js.tmp', function () {
-    var result = gulp.src(['./app/**/*ts', '!./app/init.ts'])
-        .pipe(plumber())
-        .pipe(tsProject());
-
-    return result.js
-        .pipe(template({VERSION: getVersion()}))
-        .pipe(gulp.dest('tmp'));
-});
-
-// TODO: add inline source maps (System only generate separate source maps file).
-gulp.task('build.js.prod', ['build.js.tmp'], function () {
-    return appProdBuilder.build('app', join(PATH.dest.prod.all, 'app.js'),
-        {minify: true}).catch(function (e) {
-            console.log(e);
-        });
-});
-
-gulp.task('build.init.prod', function () {
-    var result = gulp.src('./app/init.ts')
-        .pipe(insert.prepend('declare var System;'))
-        .pipe(plumber())
-        .pipe(sourcemaps.init())
-        .pipe(tsProject());
-
-    return result.js
-        .pipe(uglify())
-        .pipe(template(templateLocals()))
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(PATH.dest.prod.all));
-});
-
-
-
-gulp.task('build.assets.prod', [
-    'build.js.prod'
-    
-], function () {
-    
-        gulp.src(['./app/**/*.sass', './app/**/*.scss'])
-            .pipe(sass().on('error', sass.logError))
-            .pipe(gulp.dest(PATH.dest.dev.all));
-
-    
-
-    var filterHTML = filter('**/*.html');
-    var filterCSS = filter('**/*.css');
-    return gulp.src(['./app/**/*.html', './app/**/*.css'])
-        .pipe(filterHTML)
-        .pipe(minifyHTML(HTMLMinifierOpts))
-        .pipe(filterHTML.restore())
-        .pipe(filterCSS)
-        .pipe(minifyCSS())
-        .pipe(filterCSS.restore())
-        .pipe(gulp.dest(PATH.dest.prod.all));
-});
-
-gulp.task('build.index.prod', function () {
-    var target = gulp.src([join(PATH.dest.prod.lib, 'lib.js'),
-        join(PATH.dest.prod.all, '**/*.css')], {read: false});
-    return gulp.src(PATH.dest.prod.all + '/index.html')
-        .pipe(inject(target, {transform: transformPath('prod')}))
-        .pipe(template(templateLocals()))
-        .pipe(gulp.dest(PATH.dest.prod.all));
-});
-
-gulp.task('build.app.prod', function (done) {
-    // build.init.prod does not work as sub tasks dependencies so placed it here.
-    runSequence('clean.app.prod', 'build.init.prod', 'build.assets.prod',
-        'build.index.prod', 'clean.tmp', done);
-});
-
-gulp.task('build.prod', function (done) {
-    runSequence('clean.prod', 'build.lib.prod', 'clean.tmp', 'build.app.prod',
-        done);
-});
 
 // --------------
 // Version.
@@ -310,11 +258,6 @@ gulp.task('bump.reset', function () {
 });
 
 // --------------
-// Test.
-
-// To be implemented.
-
-// --------------
 // Serve dev.
 
 gulp.task('serve.dev', ['build.dev', 'livereload'], function () {
@@ -324,18 +267,6 @@ gulp.task('serve.dev', ['build.dev', 'livereload'], function () {
         });
     });
     serveSPA('dev');
-});
-
-// --------------
-// Serve prod.
-
-gulp.task('serve.prod', ['build.prod', 'livereload'], function () {
-    watch('./app/**', function (e) {
-        runSequence('build.app.prod', function () {
-            notifyLiveReload(e);
-        });
-    });
-    serveSPA('prod');
 });
 
 // --------------
@@ -370,6 +301,7 @@ function injectableDevAssetsRef() {
     var src = PATH.src.lib.map(function (path) {
         return join(PATH.dest.dev.lib, path.split('/').pop());
     });
+    src = src.concat(PATH.dest.dev.app_config); 
     src.push(join(PATH.dest.dev.all, '**/*.css'));
     return src;
 }
