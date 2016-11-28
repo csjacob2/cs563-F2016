@@ -5,7 +5,6 @@ var bump = require('gulp-bump');
 var concat = require('gulp-concat');
 var filter = require('gulp-filter');
 var inject = require('gulp-inject');
-var browserify = require('gulp-browserify'); 
 var rename = require('gulp-rename');
 var minifyCSS = require('gulp-minify-css');
 var minifyHTML = require('gulp-minify-html');
