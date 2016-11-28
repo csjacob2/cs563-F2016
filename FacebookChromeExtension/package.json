@@ -32,6 +32,7 @@
   "devDependencies": {
     "@types/core-js": "^0.9.34",
     "@types/node": "^6.0.45",
+    "body-parser": "^1.15.2",
     "bower": "^1.7.9",
     "cheerio": "^0.22.0",
     "concurrently": "^3.0.0",
