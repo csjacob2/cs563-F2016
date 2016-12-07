@@ -4,8 +4,6 @@ var http = require('http');
 var bodyParser =  require('body-parser'); 
 
 var app = express();
-//var classifier = new DocumentCategoryClassifier(); 
-//classifier.trainClassifierWithCnnArticleDb(); 
 
 var port = 8080; 
 
@@ -23,6 +21,22 @@ app.post('/api/classify', function(req, res) {
     (function (req, res) { 
         var classifier = new DocumentCategoryClassifier(); 
         classifier.classifyComment(req.body.article)
+              .then((result) => {
+                var response = JSON.stringify({categories: result}); 
+                res.end(response); 
+              })})(req, res); 
+});
+
+app.get('/api/train_classifiers', function(req, res) {
+    var classifier = new DocumentCategoryClassifier(); 
+    classifier.trainClassifierWithCnnArticleDb(); 
+    res.end(); 
+}); 
+
+app.get('/api/categories', function(req, res) {
+    (function (req, res) { 
+        var classifier = new DocumentCategoryClassifier(); 
+        classifier.getCategories()
               .then((result) => {
                 var response = JSON.stringify({categories: result}); 
                 res.end(response); 

@@ -27,6 +27,7 @@
       'natural': './lib/natural.js',  
       'rxjs': './lib/rxjs',
       'ng2-bootstrap/ng2-bootstrap': './lib/ng2-bootstrap/bundles/ng2-bootstrap.umd.js',
+      'ng2-select/ng2-select': './lib/ng2-select/ng2-select.js',
       'moment': './lib/moment/moment.js', 
       'angular-in-memory-web-api': './lib/angular-in-memory-web-api',
     },

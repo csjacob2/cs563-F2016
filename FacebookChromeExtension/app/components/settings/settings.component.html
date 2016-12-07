@@ -1,1 +1,60 @@
-<div> This is a blank settings page </div>
+<div>
+    <div class="row rules-row">
+        <div class="col-xs-4">
+            <h5>If Category =</h5>
+        </div>
+        <div class="col col-xs-3">
+            <h5>Then</h5>
+        </div>
+        <div class="col col-xs-3">
+            <h5>To</h5>
+        </div>
+        <div class="col col-xs-2">
+        </div>
+    </div>
+    <div class="row rules-row" *ngFor='let rule of userSettings.Rules; let i = index;'>
+        <div class="col-xs-4">
+            <ng-select [allowClear]="true"
+                       [items]="categoryOptions"
+                       [multiple]="true"
+                       [active]="rule.Category"
+                       (data)="updateCategoryForRule(i, $event)">
+
+            </ng-select>
+        </div>
+        <div class="col col-xs-3">
+            <ng-select [allowClear]="false"
+                       [items]="validOperations"
+                       [active]="rule.Operation ? [rule.Operation] : []"
+                       (data)="updateOperationForRule(i, $event)">
+
+            </ng-select>
+        </div>
+        <div class="col col-xs-3">
+            <ng-select [allowClear]="false"
+                       [items]="friendGroupOptions"
+                       [active]="rule.FriendGroups ? [rule.FriendGroups] : []"
+                       (data)="updateFriendGroupsForRule(i, $event)">
+
+            </ng-select>
+        </div>
+        <div class="col col-xs-2">
+            <button class="btn btn-danger" (click)="deleteRule(i)">
+                <i class="glyphicon glyphicon-minus-sign"></i>
+            </button>
+        </div>
+    </div>
+    <div class="row rules-row add-rule-btn">
+         <div class="col col-xs-10"></div>
+         <div class="col col-xs-2">
+            <button class="btn btn-success" (click)="addRule()">
+                <i class="glyphicon glyphicon-plus-sign"></i>
+            </button>
+        </div>
+    </div>
+    <div class="rules-save-btn">
+        <button class="btn btn-info" (click)="saveSettings()">
+           Save
+        </button>
+    </div>
+</div>

@@ -27,6 +27,10 @@ export class FacebookLoginService {
         return "";
     }
 
+    public getFacebookFriendGroups(): Array<string> {
+        return ['Family', 'Close Friends', 'Religous Friends', 'Trump supporters', 'Everybody Else']; 
+    }
+
     private parseRedirectFragment(fragment: string): {} {
         var pairs = fragment.split(/&/);
         var values = {};

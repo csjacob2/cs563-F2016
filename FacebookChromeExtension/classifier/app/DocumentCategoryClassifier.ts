@@ -24,6 +24,16 @@ export class DocumentCategoryClassifier {
         });
     }
 
+    public getCategories(): Promise<Array<any>> {
+        return new Promise<Array<any>>((resolve, reject) => {
+            this.cnnDb = new CnnArticleDbService();
+            this.cnnDb.getCategories()
+                      .then((cats) => {
+                          resolve(cats); 
+                      });  
+        });
+    }
+
     public trainClassifierWithCnnArticleDb(): void {
         this.cnnDb = new CnnArticleDbService();
         this.loadCategories();  

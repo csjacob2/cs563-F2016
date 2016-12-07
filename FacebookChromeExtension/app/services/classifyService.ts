@@ -24,7 +24,7 @@ export class ClassifierService {
         return this.http.get('http://localhost:8080/api/categories', options )
                         .map((res: Response) => {
                               let body = res.json();
-                              return body.data || { };
+                              return body.categories || [];
                         }); 
     }
 }

@@ -65,6 +65,7 @@
     "merge2": "^1.0.2",
     "natural": "^0.4.0",
     "nedb": "^1.8.0",
+    "ng2-select": "^1.1.2",
     "open": "0.0.5",
     "phantom": "^3.1.0",
     "phantomjs": "^2.1.7",
