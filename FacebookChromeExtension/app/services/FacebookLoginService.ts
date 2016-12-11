@@ -8,7 +8,6 @@ import {FacebookService, FacebookLoginResponse, FacebookInitParams} from 'ng2-fa
 
 @Injectable()
 export class FacebookLoginService {
-    private access_token: any; 
     private clientId:string = '542796552575480'; 
     private clientSecret:string = "61a2c1d4e62ecce005d826e39a9dc8f6";
     private redirectUri:string ='https://' + chrome.runtime.id +
@@ -18,20 +17,15 @@ export class FacebookLoginService {
     constructor(private http: Http) { 
     }
     
-    public loginToFacebook(): void {
-        this.getToken(); 
+    public loginToFacebook(): Promise<string> {
+        return this.getToken(); 
     }
 
-    public getFacebookAccessToken(): string {
-        ///not implemented
-        return "";
-    }
-
-    public getFacebookFriendGroups(): Array<string> {
+    public getFacebookFriendGroups(fbUsertoken: string): Array<string> {
         return ['Family', 'Close Friends', 'Religous Friends', 'Trump supporters', 'Everybody Else']; 
     }
 
-    private parseRedirectFragment(fragment: string): {} {
+    private parseRedirectFragment(fragment: string): any {
         var pairs = fragment.split(/&/);
         var values = {};
 
@@ -43,16 +37,7 @@ export class FacebookLoginService {
         return values;
     }
 
-    private handleProviderResponse(values: any): void {
-        this.setAccessToken(values.access_token);
-    }
-
-    private setAccessToken(token: any): void {
-      this.access_token = token;
-      //callback(null, access_token);
-    }
-
-    private getToken(): void {
+    private getToken(): Promise<string> {
         var options = {
           interactive: true,
           url:'https://www.facebook.com/dialog/oauth?client_id=' + this.clientId +
@@ -61,20 +46,22 @@ export class FacebookLoginService {
               '&redirect_uri=' + encodeURI(this.redirectUri) + 
               '&scope=read_custom_friendlists'
         }
-        chrome.identity.launchWebAuthFlow(options, (redirectUri) => {
-          if (chrome.runtime.lastError) {
-            ///add error handling logic. 
-            return;
-          }
 
-          var matches = redirectUri.match(this.redirectRe);
-          if (matches && matches.length > 1) {
-            this.handleProviderResponse(this.parseRedirectFragment(matches[1]));
-          }
-          else {
-            console.error("There was an error with the response from facebook."); 
-          }
-        });
+        return new Promise<string>((resolve, reject) => {
+            chrome.identity.launchWebAuthFlow(options, (redirectUri) => {
+              if (chrome.runtime.lastError) {
+                reject("There was an error with the response from facebook."); 
+              }
+
+              var matches = redirectUri.match(this.redirectRe);
+              if (matches && matches.length > 1) {
+                resolve(this.parseRedirectFragment(matches[1]).access_token);
+              }
+              else {
+                reject("There was an error with the response from facebook."); 
+              }
+            });
+        });  
     }
 }
 

@@ -21,6 +21,7 @@
     "bootstrap": "^3.3.7",
     "bower": "^1.7.9",
     "core-js": "^2.4.1",
+    "font-awesome": "^4.7.0",
     "ng2-bootstrap": "^1.1.16",
     "ng2-facebook-sdk": "^0.4.0",
     "reflect-metadata": "^0.1.8",

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Http, Headers } from '@angular/http'; 
 import { FacebookLoginService } from '../../services/FacebookLoginService';
 import { ClassifierService } from '../../services/ClassifyService';
@@ -13,13 +13,13 @@ import { SettingsPO, RulePO, RuleOperation} from '../../presentation_objects/Set
   providers: [FacebookLoginService, ClassifierService, SettingsService]
 })
 export class HomeComponent {
+    @Input() userFbAccessToken: string; 
     public assignedCategories: Array<string>; 
     public assignedFBGroups: Array<string>;
     public userComment: string; 
     private userSettings: SettingsPO; 
 
-    constructor(private fbService: FacebookLoginService, 
-                private classifier: ClassifierService,
+    constructor(private classifier: ClassifierService,
                 private settingService: SettingsService) { 
     }
 
@@ -36,10 +36,6 @@ export class HomeComponent {
                 }); 
         }
     }
-
-    public loginToFacebook(): void {
-        this.fbService.loginToFacebook(); 
-    } 
 
     private findFriendGroups(categories: Array<string>): Array<string> {
         var applicableRules = this.findApplicableRulesForCommentCategories(categories); 

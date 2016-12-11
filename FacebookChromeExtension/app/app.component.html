@@ -1,15 +1,29 @@
 <div>
     <div class="container header">
         <div class="app-header">
-            <h3 class="app-header">FBCommentAnalyzer</h3>
+            <h3 class="app-header"><i class="fa fa-facebook-square fbLogoContainer" aria-hidden="true"></i>riendSaver</h3>
         </div>
         <div class="app-body">
             <tabset>
                 <tab heading="Comment">
-                    <app-home class='facebookChromeExtension'></app-home>
+                    <div *ngIf='userFbAccessToken'>
+                        <app-home class='facebookChromeExtension'></app-home>
+                    </div>
+                    <div *ngIf='!userFbAccessToken' class='fbLoginContainer'>
+                        <div class="social-wrap a">
+                            <button id="facebook" (click)='loginToFacebook()'>Sign in with Facebook</button>
+                        </div>
+                    </div>
                 </tab>
                 <tab heading="Settings">
-                    <app-settings></app-settings>
+                    <div *ngIf='userFbAccessToken'>
+                        <app-settings></app-settings>
+                    </div>
+                    <div *ngIf='!userFbAccessToken' class='fbLoginContainer'>
+                        <div class="social-wrap a">
+                            <button id="facebook" (click)='loginToFacebook()'>Sign in with Facebook</button>
+                        </div>
+                    </div>
                 </tab>
             </tabset>
         </div>

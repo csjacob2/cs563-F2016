@@ -5,9 +5,14 @@ import { SettingsPO, RulePO, RuleOperation} from '../presentation_objects/Settin
 @Injectable()
 export class SettingsService {
     public localSettingName: string = 'userFBCASettings';
+    public localFbTokenName: string = 'userFbToken';
     constructor() { 
     }
     
+    public saveUserSettings(settings: any): void {
+        localStorage.setItem(this.localSettingName, JSON.stringify(settings)); 
+    } 
+
     public getUserSettings(): SettingsPO {
         var rawSettings = localStorage.getItem(this.localSettingName); 
         var tempSettings = JSON.parse(rawSettings);
@@ -17,17 +22,17 @@ export class SettingsService {
             var newRule = new RulePO();
             settings.Rules.push(newRule); 
             return settings; 
-        } else {
-            let settings = new SettingsPO();
-            settings.Rules = tempSettings.Rules.map((item) => {
-                var rule = new RulePO(); 
-                rule.Operation = (<any>RuleOperation)[item.Operation.id];
-                rule.Category = item.Category.map((cat) => { return cat.id });  
-                rule.FriendGroups = item.FriendGroups.id; 
-                return rule; 
-            }); 
-            return settings; 
         }
+
+        return <SettingsPO>tempSettings; 
+    }
+
+    public saveFbToken(fbToken: string): void {
+        localStorage.setItem(this.localFbTokenName, fbToken);  
+    }
+
+    public getFbToken(): string {
+        return localStorage.getItem(this.localFbTokenName); 
     }
 }
 

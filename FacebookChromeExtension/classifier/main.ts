@@ -1,4 +1,5 @@
 import { DocumentCategoryClassifier } from './app/DocumentCategoryClassifier';
+import { DocumentClassifierEvaluator } from './app/DocumentClassifierEvaluator';
 var express = require('express'); 
 var http = require('http'); 
 var bodyParser =  require('body-parser'); 
@@ -30,6 +31,18 @@ app.post('/api/classify', function(req, res) {
 app.get('/api/train_classifiers', function(req, res) {
     var classifier = new DocumentCategoryClassifier(); 
     classifier.trainClassifierWithCnnArticleDb(); 
+    res.end(); 
+}); 
+
+app.get('/api/evaluate_classifiers', function(req, res) {
+    var evaluator = new DocumentClassifierEvaluator(); 
+    evaluator.evaluateClassifier(); 
+    res.end(); 
+}); 
+
+app.get('/api/evaluate_classifiers_mn', function(req, res) {
+    var evaluator = new DocumentClassifierEvaluator(); 
+    evaluator.evaluateClassifierMultinomial(); 
     res.end(); 
 }); 
 

@@ -1,32 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Http, Headers } from '@angular/http'; 
 import { FacebookLoginService } from '../../services/FacebookLoginService';
 import { SettingsPO, RulePO, RuleOperation} from '../../presentation_objects/SettingsPO';
 import { ClassifierService } from '../../services/ClassifyService';
+import { SettingsService } from '../../services/SettingsService';
 import { Observable } from 'rxjs';
 
 @Component({
   moduleId: module.id,
   selector: 'app-settings',
   templateUrl: 'settings.component.html',
-  providers: [FacebookLoginService, ClassifierService]
+  providers: [FacebookLoginService, ClassifierService, SettingsService]
 })
 export class SettingsComponent {
-    public localSettingName: string = 'userFBCASettings';
+    @Input() userFbAccessToken: string;     
     public categoryOptions: Array<string>; 
     public friendGroupOptions: Array<string>; 
     public validOperations: Array<string> = ['Do not share', 'Share']
     public isLoading: boolean = true; 
     public userSettings: SettingsPO; 
 
-    constructor(private classifier: ClassifierService, private fbService: FacebookLoginService) { 
+    constructor(private classifier: ClassifierService, 
+                private fbService: FacebookLoginService,
+                private settingsService: SettingsService) { 
     }
 
      ngOnInit(){
         this.userSettings = this.loadSettings(); 
         this.validOperations = this.getValidOperations(); 
         this.isLoading = true; 
-        this.friendGroupOptions = this.fbService.getFacebookFriendGroups(); 
+        this.friendGroupOptions = this.fbService.getFacebookFriendGroups('not implemented'); 
         this.classifier.getCategories()
             .subscribe((categories) => {
                 var tempCategories = []; 
@@ -36,8 +39,20 @@ export class SettingsComponent {
     }
 
     public saveSettings(): void {
-        console.log(this.userSettings); 
-        localStorage.setItem(this.localSettingName, JSON.stringify(this.userSettings)); 
+        let settings = new SettingsPO(); 
+        settings.Rules = this.userSettings.Rules.map((item) => {
+                if (item.Operation.hasOwnProperty('id')) {
+                    var rule = new RulePO(); 
+                    rule.Operation = (<any>item.Operation).id;
+                    rule.Category = item.Category.map((cat) => { return cat.id });  
+                    rule.FriendGroups = item.FriendGroups.id; 
+                    return rule; 
+                } else {
+                    return item; 
+                }
+            }); 
+
+        this.settingsService.saveUserSettings(settings); 
     } 
 
     public getValidOperations(): Array<string> {
@@ -73,16 +88,16 @@ export class SettingsComponent {
     }
 
     private loadSettings(): SettingsPO {
-        var rawSettings = localStorage.getItem(this.localSettingName); 
-        var settings = JSON.parse(rawSettings);
-        console.log(settings);  
-        if (settings === null) {
-            settings = new SettingsPO(); 
-            settings.Rules = []; 
-            var newRule = new RulePO();
-            settings.Rules.push(newRule); 
-        }
-        return settings; 
+        //var rawSettings = localStorage.getItem(this.localSettingName); 
+        //var settings = JSON.parse(rawSettings);
+        //console.log(settings);  
+        //if (settings === null) {
+        //    settings = new SettingsPO(); 
+        //    settings.Rules = []; 
+        //    var newRule = new RulePO();
+        //    settings.Rules.push(newRule); 
+        //}
+        return this.settingsService.getUserSettings();
     }
 }
 

@@ -48,6 +48,7 @@ var PATH = {
         dev: {
             all: 'dist/dev',
             app: 'dist/dev/app',
+            app_fonts: 'dist/dev/app/fonts', 
             app_config: [
                 './dist/dev/app/systemjs.config.js',
                 './dist/dev/app/startup.js'
@@ -68,6 +69,13 @@ var PATH = {
             './systemjs.config.js',
             './app/startup.js',
         ],
+        app_fonts: [
+            './bower_components/font-awesome/fonts/fontawesome-webfont.eot',
+            './bower_components/font-awesome/fonts/fontawesome-webfont.svg',
+            './bower_components/font-awesome/fonts/fontawesome-webfont.ttf',
+            './bower_components/font-awesome/fonts/fontawesome-webfont.woff',
+            './bower_components/font-awesome/fonts/fontawesome-webfont.woff2'
+        ],
         lib: [
             './node_modules/traceur/bin/traceur-runtime.js',
             './node_modules/es6-module-loader/dist/es6-module-loader-sans-promises.js',
@@ -79,11 +87,12 @@ var PATH = {
             './node_modules/zone.js/dist/zone.js',
             './node_modules/fb/lib/fb.js',
             './bower_components/jquery/dist/jquery.min.js',
-            './bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js'
+            './bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js'             
         ],
         angular2: [
             './node_modules/@angular/**/*',
             './node_modules/ng2-bootstrap/**/*',
+            './node_modules/ng2-select/**/*',
             './node_modules/moment/**/*',
             './node_modules/natural/**/*',
             './node_modules/nedb/**/*.js',
@@ -223,7 +232,12 @@ gulp.task('build.app.config.dev', function () {
         .pipe(gulp.dest(PATH.dest.dev.app));
 });
 
-gulp.task('build.assets.dev', ['build.app.config.dev', 'build.js.app.dev', 'build.css.dev'], function () {
+gulp.task('build.fonts.dev', function () {
+    return gulp.src(PATH.src.app_fonts)
+        .pipe(gulp.dest(PATH.dest.dev.app_fonts));
+});
+
+gulp.task('build.assets.dev', ['build.app.config.dev', 'build.js.app.dev', 'build.css.dev', 'build.fonts.dev'], function () {
     return gulp.src(['./app/**/*.html', './app/**/*.css'])
         .pipe(gulp.dest(PATH.dest.dev.app));
 });

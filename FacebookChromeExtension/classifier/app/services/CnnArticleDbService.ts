@@ -55,6 +55,6 @@ export class CnnArticleDbService {
 export interface CnnArticle {
     _id: string; 
     articleText: string; 
-    articleCategory: string; 
+    articleCategory: Array<string>; 
     docUrl: string; 
 }
