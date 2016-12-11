@@ -88,15 +88,6 @@ export class SettingsComponent {
     }
 
     private loadSettings(): SettingsPO {
-        //var rawSettings = localStorage.getItem(this.localSettingName); 
-        //var settings = JSON.parse(rawSettings);
-        //console.log(settings);  
-        //if (settings === null) {
-        //    settings = new SettingsPO(); 
-        //    settings.Rules = []; 
-        //    var newRule = new RulePO();
-        //    settings.Rules.push(newRule); 
-        //}
         return this.settingsService.getUserSettings();
     }
 }

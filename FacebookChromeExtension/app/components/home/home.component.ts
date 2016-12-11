@@ -40,8 +40,7 @@ export class HomeComponent {
     private findFriendGroups(categories: Array<string>): Array<string> {
         var applicableRules = this.findApplicableRulesForCommentCategories(categories); 
         var postToFbGroups = applicableRules.map((item) => {
-            var test = RuleOperation.Send; 
-            if(item.Operation === RuleOperation.Send) {
+            if(<any>RuleOperation[item.Operation] === RuleOperation.Send) {
                 return item.FriendGroups; 
             }
         }).filter((item) => { 
@@ -50,7 +49,7 @@ export class HomeComponent {
             }}); 
 
         var doNotPostToFbGroups = applicableRules.map((item) => {
-            if(item.Operation === RuleOperation.DoNotSend) {
+            if(<any>RuleOperation[item.Operation] === RuleOperation.DoNotSend) {
                 return item.FriendGroups; 
             }
         }).filter((item) => { 
@@ -59,7 +58,7 @@ export class HomeComponent {
             }});; 
 
         for(var i =0; i < doNotPostToFbGroups.length; ++i) {
-                var idxGroup = doNotPostToFbGroups.indexOf(postToFbGroups[i]); 
+                var idxGroup = postToFbGroups.indexOf(doNotPostToFbGroups[i]); 
                 if (idxGroup > -1) {
                     postToFbGroups.splice(idxGroup,1); 
                 }
