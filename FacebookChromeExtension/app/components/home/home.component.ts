@@ -27,6 +27,12 @@ export class HomeComponent {
         this.userSettings = this.settingService.getUserSettings(); 
    }
 
+    public postComment(): void {
+        this.assignedCategories = []; 
+        this.assignedFBGroups = []; 
+        this.userComment = ''; 
+    }
+
     public analyzeComent(): void {
         if (this.userComment !== undefined && this.userComment !== '') {
             this.classifier.classifyComment(this.userComment)
@@ -43,8 +49,10 @@ export class HomeComponent {
             if(<any>RuleOperation[item.Operation] === RuleOperation.Send) {
                 return item.FriendGroups; 
             }
-        }).filter((item) => { 
-            if (item !== undefined) {
+        });
+
+        postToFbGroups = postToFbGroups.filter((item, pos) => { 
+            if (item !== undefined && postToFbGroups.indexOf(item) === pos) {
                 return true;
             }}); 
 
@@ -52,10 +60,12 @@ export class HomeComponent {
             if(<any>RuleOperation[item.Operation] === RuleOperation.DoNotSend) {
                 return item.FriendGroups; 
             }
-        }).filter((item) => { 
-            if (item !== undefined) {
+        });  
+
+        doNotPostToFbGroups = doNotPostToFbGroups.filter((item, pos) => { 
+            if (item !== undefined && doNotPostToFbGroups.indexOf(item) === pos) {
                 return true;
-            }});; 
+            }}); 
 
         for(var i =0; i < doNotPostToFbGroups.length; ++i) {
                 var idxGroup = postToFbGroups.indexOf(doNotPostToFbGroups[i]); 
@@ -69,8 +79,11 @@ export class HomeComponent {
     private findApplicableRulesForCommentCategories(categories: Array<string>): Array<RulePO> {
        return this.userSettings.Rules.filter((item) => {
             for(var i = 0; i < categories.length; ++i){
-                return item.Category.indexOf(categories[i]) !== -1; 
+                 if (item.Category.indexOf(categories[i]) !== -1){
+                     return true; 
+                 } 
             }
+            return false; 
        }); 
     }
 }
